@@ -1,0 +1,72 @@
+[
+ {
+  "name": "grassland fire spreads",
+  "pass": true,
+  "info": "lit 13 -> 267 cells after 15s"
+ },
+ {
+  "name": "no burning cells on non-fuel",
+  "pass": true,
+  "info": ""
+ },
+ {
+  "name": "forest does not ignite/spread",
+  "pass": true,
+  "info": "lit 0, burning 0"
+ },
+ {
+  "name": "road does not ignite",
+  "pass": true,
+  "info": "fuel 0"
+ },
+ {
+  "name": "water does not ignite",
+  "pass": true,
+  "info": ""
+ },
+ {
+  "name": "rain extinguishes fire",
+  "pass": true,
+  "info": "27 burning -> 0 after 12 s storm (rain 0.82); re-ignite wet ground: 0 cells"
+ },
+ {
+  "name": "console clean (logic page)",
+  "pass": true,
+  "info": ""
+ },
+ {
+  "name": "tree HP 3->2->1->gone via bus",
+  "pass": true,
+  "info": ""
+ },
+ {
+  "name": "stub HP rule",
+  "pass": true,
+  "info": "head-on dmg@60/150/200/250/301/350, side@150 = 1,2,2,3,3,3,1"
+ },
+ {
+  "name": ">300 km/h zooms through trees",
+  "pass": true,
+  "info": "39 trees removed over 145 m"
+ },
+ {
+  "name": "60 km/h damages but keeps tree",
+  "pass": true,
+  "info": "hp 2"
+ },
+ {
+  "name": "console clean (HP page)",
+  "pass": true,
+  "info": ""
+ },
+ {
+  "name": "fps desktop 1280x720 (SwiftShader software GL)",
+  "pass": true,
+  "info": "10.6 fps, 18 draw calls, 375140 tris"
+ },
+ {
+  "name": "fps iPhone12-size 390x844 q=low (SwiftShader software GL)",
+  "pass": true,
+  "info": "11.6 fps, 17 draw calls, 333200 tris"
+ }
+]
