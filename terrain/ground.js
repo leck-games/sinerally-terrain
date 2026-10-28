@@ -75,7 +75,7 @@ function createGrass(scene, grid, { count = 12000, tile = 72 } = {}) {
       precision highp float; precision highp sampler2D;
       attribute vec4 off; uniform sampler2D uTex; uniform float uN, uStep, uTile, uTime; uniform vec2 uCenter;
       ` + GLSL_ENV + /* glsl */`
-      varying vec3 vCol; varying float vY; varying vec3 vW; varying vec2 vF;
+      varying vec3 vCol; varying float vY; varying vec3 vW; varying vec3 vF;
       vec4 tx(float gi, float gj) { return texelFetch(uTex, ivec2(int(mod(gi, uN)), int(mod(gj, uN))), 0); }
       void main() {
         vec2 w = off.xy + uTile * floor((uCenter - off.xy) / uTile + 0.5);
@@ -91,21 +91,34 @@ function createGrass(scene, grid, { count = 12000, tile = 72 } = {}) {
         float cs = cos(off.w), sn = sin(off.w);
         vec3 p = position; p.xz = mat2(cs, -sn, sn, cs) * p.xz * (0.9 + 0.6 * off.z);
         float ws = 0.06 + 0.03 * uWind.z;
-        float sway = sin(uTime * (1.4 + 0.12 * uWind.z) + dot(w, uWind.xy) * 0.21 + w.x * 0.05) * ws + ws * 0.8;
+        float sway = sin(uTime * (1.4 + 0.12 * uWind.z) + dot(w, uWind.xy) * 0.21 + w.x * 0.05) * ws + ws * 0.8
+                   + sin(uTime * 3.3 + w.x * 0.6) * 0.06 * (0.5 + 0.1 * uWind.z);           // engine-build flutter on top of the wind lean
         p.x += sway * uWind.x * p.y * p.y; p.z += sway * uWind.y * p.y * p.y;
         p *= hgt;
         vec3 wp = vec3(w.x + p.x, s.x + p.y - 0.05, w.y + p.z);
         vec2 gn = floor(g + 0.5); vec4 cn = tx(gn.x, gn.y); float pc = cn.z; vec3 base = vec3(floor(pc / 256.0), mod(pc, 256.0), cn.w) / 255.0;
-        vY = position.y; vW = wp; vF = vec2(burnt, fs.g);
-        vCol = base * (0.92 + 0.16 * off.z);
+        vY = position.y; vW = wp; vF = vec3(burnt, fs.g, wetAt(w));
+        // ENGINE-BUILD LOOK (sinerally-engine grass.js): smooth per-vertex root->tip gradient base*(0.62+0.55y), unlit, no cel steps;
+        // re-expressed relative to the raw comic ground colour so roots sit a bit darker than the ground and tips ~20% lighter.
+        vec3 al = base / vec3(0.9, 1.08, 0.85);                                          // ground albedo (undo the packing tint)
+        vec3 lin = base * (0.62 + 0.55 * position.y) * (0.92 + 0.16 * off.z);             // engine's vCol
+        vec3 k = pow(max(lin / max(al * 0.86, vec3(1e-3)), vec3(1e-3)), vec3(0.4545));     // engine grass/ground ratio, display space
+        vec3 pa = pow(al, vec3(0.85)); pa = mix(vec3(dot(pa, vec3(.299,.587,.114))), pa, 0.9) * vec3(0.94, 1.0, 0.96); // softer, slightly greener blade tint
+        vCol = pa * k;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(wp, 1.0);
       }`,
     fragmentShader: COMIC + /* glsl */`
-      varying vec3 vCol; varying float vY; varying vec3 vW; varying vec2 vF;
+      varying vec3 vCol; varying float vY; varying vec3 vW; varying vec3 vF;
       void main() {
-        float t = vY < 0.33 ? 0.74 : (vY < 0.72 ? 0.9 : 1.1);
-        vec3 al = mix(vCol, vec3(.1,.08,.07), vF.x);
-        vec3 c = comic(al * t, vec3(0., 1., 0.), vW, 0.0);
+        // engine-style grass: smooth gradient, no hatching/ink rim; still follows the ground's sun band, cloud shadows, light, headlights
+        vec3 al = mix(vCol, vec3(.1,.08,.07), vF.x);                                     // burnt stubble
+        float l = (uSun.y * 0.5 + 0.5) * (1.0 - 0.45 * cloudShadow(vW));
+        float band = l > 0.62 ? 1.04 : (l > 0.42 ? 0.74 : 0.5);
+        vec3 c = al * band * (uLight + uFlash);
+        c = mix(c, c * vec3(0.62, 0.70, 1.25), smoothstep(1.0, 0.5, band) * 0.75);
+        c += al * 0.10 * uAmb + uHeadK * headLight(al, vec3(0., 1., 0.), vW);
+        c = mix(c, c * vec3(.55,.6,.7), vF.z * 0.6);                                     // wet/rain-soaked blades darker, like wet ground
+        c = fogMix(c, vW, 1.0);
         c = mix(c, mix(vec3(1.,.35,.05), vec3(1.,.85,.25), step(0.6, vY)), step(0.2, vF.y));
         gl_FragColor = vec4(c, 0.);
       }`,

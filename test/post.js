@@ -19,9 +19,10 @@ export function postMat() {
         float e = max(ed, smoothstep(0.03, 0.06, na)) * (1. - 0.8 * smoothstep(90., 450., dc)) * (1. - smoothstep(0.4 * uFar, 0.85 * uFar, min(dc, min(min(dl, dr), min(dd, du)))));
         float amin = min(min(min(al, ar), min(ad, au)), a0); e *= mix(1., 0.04, step(amin, 0.03));
         vec3 c = c0.rgb; float L = dot(c, vec3(.299,.587,.114));
-        c = mix(vec3(L), c, 1.18); c = mix(c, floor(c * 6. + 0.5) / 6., 0.5);
+        float gk = step(a0, 0.03); // alpha-0 pixel (grass/rain/smoke): keep its smooth gradient, no posterize/halftone
+        c = mix(vec3(L), c, 1.18); c = mix(c, floor(c * 6. + 0.5) / 6., 0.5 * (1. - gk));
         if (uFx > 0.5) { vec2 g = gl_FragCoord.xy / (uPx * 4.); g = mat2(.707,-.707,.707,.707) * g; vec2 f = fract(g) - 0.5;
-          c *= 1. - 0.12 * step(length(f), (1. - L) * 0.55) * smoothstep(0.55, 0.25, L);
+          c *= 1. - 0.12 * step(length(f), (1. - L) * 0.55) * smoothstep(0.55, 0.25, L) * (1. - gk);
           c *= 0.96 + 0.08 * h21(floor(gl_FragCoord.xy / uPx) + floor(uTime * 12.)); }
         c = mix(c, vec3(.02,.015,.03), min(1., e * 1.3));
         vec2 p = vUv - 0.5; p.x *= uRes.x / uRes.y; c *= 1. - 0.25 * smoothstep(0.55, 1.0, length(p));
