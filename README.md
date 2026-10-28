@@ -53,6 +53,22 @@ It then renders `test/shots.json` into `shots/` and measures fps. Results are in
 
 Screenshots: `shots/01-forest-clouds-rain.png`, `02-cloud-shadows`, `03-grassland-fire`, `04-burnt-ground`, `05-burning-trees-night`, `06-tree-hp-states`, `07-test-page-ui`.
 
+## Road widths (v2)
+Roads were widened. Half-widths live in `terrain/world.js` as `ROAD_HW` (the old values are in `ROAD_HW_V1`):
+
+| road | old full width | new full width | factor |
+|---|---|---|---|
+| paved highway | 12 m | 24 m (2 lanes each way, lane dashes) | 2× |
+| dirt trail | 7.2 m | 10.8 m | 1.5× |
+| dirt race loop | 16 m (about 14.7 m drivable) | 24 m | 1.5× |
+
+- Everything derives from `e.hw`: the mesh ribbon, grade flattening (`hw + 1.5` core), the shoulder fade (`hw+0.5 … hw+2.5`), bank, bridge deck, rails and piers, and the tree/rock/grass/fuel masks.
+- Bridges now also probe the water at both road edges (±hw), so a river under one edge of a wide road gets a bridge, not a fill.
+- Race loops now measure the perpendicular distance (it used to be radial), so the drivable width matches the mesh. `trackW()` scales with the loop width.
+- Junction pads at road-graph nodes are unchanged; a node in water still gets a small raised pad.
+
+Run `node test/roads.mjs` (Node only, no browser). It measures the median width over about 2,700 cross-sections, checks that the masks follow the width, that bridge decks span the full width, and that water stays under the decks.
+
 ## Performance (honest)
 All numbers come from SwiftShader **software** rendering on a CPU-only server. They are **not** device numbers:
 - 1280×720: about 10.6 fps, 18 draw calls, about 375k tris

@@ -31,7 +31,7 @@ const shot = async (p, n) => { await p.screenshot({ path: OUT + n }); console.lo
     // road + water: search around grassland
     let road = null, water = null; const o = {};
     for (let i = 0; i < 40000 && (!road || !water); i++) { const a = i * 2.39996, rr = 4 * Math.sqrt(i); const x = g.x + Math.cos(a) * rr, z = g.z + Math.sin(a) * rr; W.sample(x, z, o);
-      if (!road && o.road > 0.6) road = { x, z }; if (!water && o.h < -0.5) water = { x, z }; }
+      if (!road && o.road > 0.6 && o.rd < -2) road = { x, z }; if (!water && o.h < -0.5) water = { x, z }; }
     out.road = road; out.water = water;
     if (road) { __tt.setCam(road.x, T.heightAt(road.x, road.z) + 30, road.z); __tt.sim(0.3); out.roadLit = T.ignite(road.x, road.z, { radius: 0.5 }); out.roadFuel = T.fuelAt(road.x, road.z); }
     if (water) { __tt.setCam(water.x, 30, water.z); __tt.sim(0.3); out.waterLit = T.ignite(water.x, water.z, { radius: 2 }); }

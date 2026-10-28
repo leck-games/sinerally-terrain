@@ -21,3 +21,8 @@ I did not touch the game repo. The plan for merging:
 7. **Watch out for**:
    - `flat` is a reserved word in GLSL ES 3.
    - In r160 use `attr.clearUpdateRanges()` + `addUpdateRange()`, not `updateRange`.
+
+## Update: wider roads
+- Highways are 2× wider (24 m) and dirt trails/loops 1.5× wider (10.8 m / 24 m), via `ROAD_HW` in world.js. No API changes.
+- Game side: scale any hard-coded road widths (minimap/map line widths) using `ROAD_HW`. Rocks keep using `road`/`rd`, so they stay off the wider roads automatically.
+- Bridges probe ±hw for water. Loop distance is now perpendicular. `test/roads.mjs` was added. The e2e road-ignite probe now picks a point well inside the road bed.

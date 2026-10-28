@@ -62,11 +62,11 @@
  {
   "name": "fps desktop 1280x720 (SwiftShader software GL)",
   "pass": true,
-  "info": "10.6 fps, 18 draw calls, 375140 tris"
+  "info": "11.3 fps, 18 draw calls, 375140 tris"
  },
  {
   "name": "fps iPhone12-size 390x844 q=low (SwiftShader software GL)",
   "pass": true,
-  "info": "11.6 fps, 17 draw calls, 333200 tris"
+  "info": "10.0 fps, 17 draw calls, 333360 tris"
  }
 ]
